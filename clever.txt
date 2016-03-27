@@ -1,0 +1,151 @@
+print "Turn number";
+print ?turn;
+$deficit_raw := 0;
+$deficit_prod := 0;
+$fail_buy := 0;
+$fail_sell := 0;
+$max_factories := 3;
+
+if ?money(?my_id) > 20000 then
+	if ?factories(?my_id) < $max_factories then
+		if ?factories_being_build = 0 then
+			build 1;
+		end;
+	end;
+end;
+
+if ?expected_raw_sold > ?result_raw_sold(?my_id) then
+	print "expected_raw_sold:";
+	print ?expected_raw_sold;
+	$fail_buy := 1;
+end;
+if ?expected_prod_bought > ?result_prod_bought(?my_id) then
+	print "expected_prod_bought:";
+	print ?expected_prod_bought;
+	$fail_sell := 1;
+end;
+$raw_expact := 0;
+$i := 1;
+while $i < ?active_players + 1 do
+	if ?raw($i) > ?factories($i) then
+		$raw_expact := $raw_expact + 2*?factories($i) - ?raw($i);
+	end;
+	if ?raw($i) < ?factories($i) then
+		$raw_expact := $raw_expact + ?factories($i);
+	end;
+	if ?raw($i) = ?factories($i) then
+		$raw_expact := $raw_expact + ?factories($i);
+	end;
+	$i := $i + 1;
+end;
+print "raw expact:";
+print $raw_expact;
+if ?supply < $raw_expact then
+	$deficit_raw := 1;
+end;
+
+$prod_expact := 0;
+$i := 1;
+while $i < ?active_players + 1 do
+	$prod_expact := $prod_expact + ?production($i);
+	$i := $i + 1;
+end;
+print "prod expact:";
+print $prod_expact;
+if ?demand < $prod_expact then
+	$deficit_prod := 1;
+end;
+
+print "deficit raw:";
+print $deficit_raw;
+print "deficit prod:";
+print $deficit_prod;
+print "fail buy:";
+print $fail_buy;
+print "fail sell:";
+print $fail_sell;
+
+if $deficit_raw = 1 then
+	if $fail_buy = 1 then
+		$max := 0;
+		$i := 2;
+		while $i < ?active_players + 1 do
+			if ?result_raw_price($i) > 0 then
+				if ?result_raw_price($i) > $max then
+					$max := ?result_raw_price($i);
+				end;
+			end;
+			$i := $i + 1;
+		end;
+		if $max = 0 then
+			$max := ?prev_raw_price;
+		end;
+		$price_buy := ?raw_price + $max - ?prev_raw_price + 33;
+	end;
+	if $fail_buy = 0 then
+		$price_buy := ?raw_price + 66;
+	end;
+end;
+if $deficit_raw = 0 then
+	$price_buy := ?raw_price;
+end;
+$amount := 2*?factories(?my_id) - ?raw(?my_id);
+if ?raw(?my_id) < ?factories(?my_id) then
+	$amount := ?factories(?my_id);
+end;
+if $amount > ?supply then
+	$amount := ?supply;
+end;
+if ?money(?my_id) > $price_buy*$amount then
+	buy $amount $price_buy;
+end;
+
+if $deficit_prod = 1 then
+	if $fail_sell = 1 then
+		$min := 10000;
+		$i := 2;
+		while $i < ?active_players + 1 do
+			if ?result_prod_price($i) > 0 then
+				if ?result_prod_price($i) < $min then
+					$min := ?result_prod_price($i);
+				end;
+			end;
+			$i := $i + 1;
+		end;
+		if $min = 10000 then
+			$min := ?prev_prod_price;
+		end;
+		print "min:";
+		print $min;
+		print "prev_prod_price:";
+		print ?prev_prod_price;
+		$offset := ?prev_prod_price - $min;
+		$price_sell := ?production_price - $offset - 66;
+	end;
+	if $fail_sell = 0 then
+		$price_sell := ?production_price - 333;
+	end;
+end;
+if $deficit_prod = 0 then
+	$price_sell := ?production_price;
+end;
+$amount := ?production(?my_id);
+if $amount > ?demand then
+	$amount := ?demand;
+end;
+sell $amount $price_sell;
+
+$toprod := ?factories(?my_id);
+if ?raw(?my_id) < $toprod then
+	$toprod := ?raw(?my_id);
+end;
+prod $toprod;
+
+if ?turn = 1 then
+	buy 2 ?raw_price;
+	sell 2 ?production_price;
+	prod 2;
+end;
+
+endturn;
+end.

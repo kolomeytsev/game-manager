@@ -1,0 +1,31 @@
+<P> ::= <S> '.'
+<S> ::= <assignment_statement> <S> | <goto_statement> <S> | <if_statement> <S> | <game_statement> <S> | <print_statement> <S> | <label> '>' <S> | 'end'
+
+<expression> ::= <op1> <ending1>
+<ending1> ::= ['='|'>'|'<'] <expression> | epsilon
+<op1> ::= <op2> <ending2>
+<ending2> ::= ['+' | '-'] <op1> | epsilon
+<op2> ::= <op3> <ending3>
+<ending3> ::= ['*' | '/' | '%'] <op2> | epsilon
+<op3> ::= <function> | <number> | <variable> | '(' <expression> ')'
+
+<function> ::= <function_without_param> | <function_with_param> '(' expression ')'
+
+<assignment_statement> ::= <variable> ':=' <expression> ';'
+<variable> ::= <var_name> <index>
+<index> ::= '[' <expression> ']' | epsilon
+
+<goto_statement> ::= 'goto' <label> ';'
+
+<if_statement> ::= 'if' <expression> 'then' <S> ';'
+
+<while_statement> ::= 'while' <expression> 'do' <S> ';'
+
+<game_statement> ::= <name0> ';' | <name1> <expression> ';' | <name2> <expression> <expression> ';'
+<name0> ::= 'endturn'
+<name1> ::= 'prod' | 'build'
+<name2> ::= 'buy' | 'sell'
+
+<print_statement> ::= 'print' <element> ';'
+<element> ::= <expression> | <string>
+

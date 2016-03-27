@@ -1,0 +1,13 @@
+print "Turn number";
+print ?turn;
+if ?money(?my_id) > 2*?raw_price then
+	buy 2 ?raw_price;
+end;
+sell ?production(?my_id) ?production_price;
+$toprod := 2;
+if ?raw(?my_id) < $toprod then
+	$toprod := ?raw(?my_id);
+end;
+prod $toprod;
+endturn;
+end.
